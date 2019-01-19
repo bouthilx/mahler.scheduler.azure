@@ -1,10 +1,10 @@
-.. mahler.scheduler.flow documentation master file,
+.. mahler.scheduler.azure documentation master file,
    created by sphinx-quickstart on Sun Aug 16 14:37:50 2015
    You can adapt this file completely to your liking, but it should at least contain the root
    `toctree` directive.
 
-Welcome to mahler.scheduler.flow's documentation
-=======================================
+Welcome to mahler.scheduler.azure's documentation
+=================================================
 
 Contents:
 

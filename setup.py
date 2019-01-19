@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Installation script for `mahler.scheduler.flow`."""
+"""Installation script for `mahler.scheduler.azure`."""
 import os
 
 from setuptools import setup
@@ -13,7 +13,7 @@ repo_root = os.path.dirname(os.path.abspath(__file__))
 tests_require = ['pytest>=3.0.0']
 
 setup_args = dict(
-    name='mahler.scheduler.flow',
+    name='mahler.scheduler.azure',
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     description='TODO',
@@ -21,14 +21,14 @@ setup_args = dict(
     license='GNU GPLv3',
     author=u'Xavier Bouthillier',
     author_email='xavier.bouthillier@umontreal.ca',
-    url='https://github.com/bouthilx/mahler.scheduler.flow',
-    packages=['mahler.scheduler.flow'],
+    url='https://github.com/bouthilx/mahler.scheduler.azure',
+    packages=['mahler.scheduler.azure'],
     package_dir={'': 'src'},
     include_package_data=True,
     # data_files=find_data_files(),
     entry_points={
         'Scheduler': [
-            'flow = mahler.scheduler.flow'
+            'azure = mahler.scheduler.azure'
             ],
         },
     install_requires=['mahler.core', 'flow'],

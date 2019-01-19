@@ -21,4 +21,4 @@ recursive-include src *.py
 recursive-include tests *.py *.yaml *.json *.txt *.yml *.in LICENSE
 include tests/requirements.txt
 include versioneer.py
-include src/mahler/scheduler/flow/_version.py
+include src/mahler/scheduler/azure/_version.py

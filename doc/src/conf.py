@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# mahler.scheduler.flow documentation build configuration file.
+# mahler.scheduler.azure documentation build configuration file.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -25,7 +25,7 @@ sys.path.insert(0, docs_src_path)
 src_path = os.path.abspath(os.path.join(docs_src_path, '..', '..', 'src'))
 sys.path.insert(0, src_path)
 
-import mahler.scheduler.flow as scheduler_plugin
+import mahler.scheduler.azure as scheduler_plugin
 
 # -- General configuration ------------------------------------------------
 
@@ -62,7 +62,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'mahler.scheduler.flow'
+project = u'mahler.scheduler.azure'
 _full_version = scheduler_plugin.__version__
 copyright = scheduler_plugin.__copyright__
 author = scheduler_plugin.__author__
@@ -237,7 +237,7 @@ html_sidebars = {
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'flowdoc'
+htmlhelp_basename = 'azuredoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -259,8 +259,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'mahler.scheduler.flow.tex',
-   u'Mahler scheduler flow Documentation',
+  (master_doc, 'mahler.scheduler.azure.tex',
+   u'Mahler scheduler azure Documentation',
    u'Xavier Bouthillier', 'manual'),
 ]
 
@@ -291,7 +291,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     (master_doc, 'projectname',
-     u'Mahler scheduler flow Documentation',
+     u'Mahler scheduler azure Documentation',
      [author], 1)
 ]
 
@@ -305,9 +305,9 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'flow',
-   u'Mahler scheduler flow Documentation',
-   author, 'flow', scheduler_plugin.__descr__,
+  (master_doc, 'azure',
+   u'Mahler scheduler azure Documentation',
+   author, 'azure', scheduler_plugin.__descr__,
    'Miscellaneous'),
 ]
 
