@@ -10,6 +10,7 @@
 TODO: Write long description
 
 """
+from collections import defaultdict
 import getpass
 import logging
 import os
@@ -24,11 +25,11 @@ logger = logging.getLogger(__name__)
 
 SUBMISSION_ROOT = os.environ['FLOW_SUBMISSION_DIR']
 
-FLOW_OPTIONS_TEMPLATE = "mem=20000M;time=2:59:00;job-name={job_name}"
+FLOW_OPTIONS_TEMPLATE = "mem=20000M;time=2:59:00;job-name={job_name};partition={partition};nodelist={node};gres=''"
 
-FLOW_TEMPLATE = "flow-submit {container} --config {file_path} --options {options}"
+FLOW_TEMPLATE = "flow-submit {container} --config {file_path} --options {options} --prolog CUDA_VISIBLE_DEVICES={gpu_id}"
 
-COMMAND_TEMPLATE = "CUDA_VISIBLE_DEVICES={gpu_id} mahler execute{container}{tags}{options}"
+COMMAND_TEMPLATE = "mahler execute{container}{tags}{options}"
 
 SUBMIT_COMMANDLINE_TEMPLATE = "{flow} launch {command}"
 
@@ -40,22 +41,22 @@ class AzureResources(Resources):
     def __init__(self, nodes, max_workers=100):
         """
         """
-        self.nodes = nodes
+        self.nodes = dict(next(iter(p.items())) for p in nodes)
         self.max_workers = max_workers
 
     def _available(self):
         """
         """
-        command = 'squeue -h -r -o \'%j %N %P\' -u {user}'.format(user=getpass.getuser())
+        command = 'squeue -h -r -o %j,%N,%P -u {user}'.format(user=getpass.getuser())
         out = subprocess.check_output(command.split(" "))
         out = str(out, encoding='utf-8')
-        ressources = dict()
+        resources = dict()
         for line in out.split("\n"):
             line = line.strip()
             if not line:
                 continue
 
-            name, node, partition = line.split(" ")
+            name, node, partition = line.split(",")
 
             # We only support jobs using a single GPU
             gpu_id = int(name.split("-")[1])
@@ -84,11 +85,16 @@ class AzureResources(Resources):
             for node, node_resources in nodes.items():
                 availability[partition][node] = dict(gpu=dict())
                 for gpu_id in node_resources['gpu']:
-                    gpu_available = max(1 - resources[partition][node])
+                    if partition not in resources:
+                        gpu_available = 1
+                    elif node not in resources:
+                        gpu_available = 1
+                    else:
+                        gpu_available = max(1 - resources[partition][node].get(gpu_id, 0))
                     total_available += gpu_available
                     availability[partition][node]['gpu'][gpu_id] = gpu_available
 
-        logging.debug('total: {}'.format(total_jobs))
+        logging.debug('total: {}'.format(total_available))
 
         # return max(self.max_workers - total_jobs, 0)
         return total_available, availability
@@ -106,8 +112,8 @@ class AzureResources(Resources):
 
     def pick_gpu(self, gpu_usage, nodes_available):
         for partition, nodes in nodes_available.items():
-            for node, gpus in nodes.items():
-                for gpu, availability in gpus.items():
+            for node, node_resources in nodes.items():
+                for gpu, availability in node_resources['gpu'].items():
                     if availability >= gpu_usage:
                         return partition, node, gpu
 
@@ -115,7 +121,7 @@ class AzureResources(Resources):
 
     def _make_job_name(self, task, gpu_id):
         name = "gpu-{}".format(gpu_id)
-        if task['resources']['gpu'] == 0.5:
+        if task['facility']['resources']['gpu'] == 0.5:
             name += "-half"
         return name
 
@@ -125,11 +131,14 @@ class AzureResources(Resources):
         if not total_available:
             return
 
-        partition, node, gpu = self.pick_gpu(task['resources']['gpu'], nodes_available)
+        partition, node, gpu = self.pick_gpu(task['facility']['resources']['gpu'], nodes_available)
         if partition is None:
             return
 
-        flow_options = FLOW_OPTIONS_TEMPLATE.format(job_name=self._make_job_name(task, gpu))
+        flow_options = FLOW_OPTIONS_TEMPLATE.format(
+            job_name=self._make_job_name(task, gpu),
+            partition=partition,
+            node=node)
 
         submission_dir = os.path.join(SUBMISSION_ROOT, container)
         if not os.path.isdir(submission_dir):
@@ -143,10 +152,9 @@ class AzureResources(Resources):
         file_path = os.path.join(submission_dir, file_name)
 
         flow_command = FLOW_TEMPLATE.format(
-            container=container, file_path=file_path, options=flow_options)
+            container=container, file_path=file_path, options=flow_options, gpu_id=gpu)
 
         command = COMMAND_TEMPLATE.format(
-            gpu_id=gpu,
             container=" --container " + container if container else "",
             tags=" --tags " + " ".join(tags) if tags else "",
             options=" --working-dir={}".format(working_dir) if working_dir else "")

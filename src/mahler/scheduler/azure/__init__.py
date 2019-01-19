@@ -15,7 +15,7 @@ import mahler.core
 import mahler.core.utils.config
 
 from ._version import get_versions
-from .resources import FlowResources
+from .resources import AzureResources
 
 VERSIONS = get_versions()
 del get_versions
@@ -37,7 +37,7 @@ DEF_CONFIG_FILES_PATHS = [
 
 
 def build(max_workers, **kwargs):
-    return FlowResources(max_workers=max_workers)
+    return AzureResources(nodes=kwargs.get('nodes', []), max_workers=max_workers)
 
 
 def build_parser(parser):
@@ -55,7 +55,7 @@ def define_config():
         'max_workers', type=int, default=1, env_var='MAHLER_SCHEDULER_AZURE_MAX_WORKERS')
 
     config.add_option(
-        'nodes', type=dict, default={})
+        'nodes', type=list, default=[])
 
     return config
 
