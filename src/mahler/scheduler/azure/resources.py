@@ -60,6 +60,10 @@ class AzureResources(Resources):
             name, node, partition = line.split(",")
 
             # We only support jobs using a single GPU
+            if 'gpu' not in name:
+                logger.warning("A job does not follow the naming standard: {}".format(name))
+                continue
+
             gpu_id = int(name.split("-")[1])
             gpu_usage = 0.5 if name.endswith('-half') else 1
 
