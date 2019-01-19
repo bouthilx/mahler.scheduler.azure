@@ -16,6 +16,7 @@ import logging
 import os
 import pprint
 import subprocess
+import time
 
 from mahler.core.resources import Resources
 
@@ -27,7 +28,7 @@ SUBMISSION_ROOT = os.environ['FLOW_SUBMISSION_DIR']
 
 FLOW_OPTIONS_TEMPLATE = "mem=20000M;time=2:59:00;job-name={job_name};partition={partition};nodelist={node};gres=''"
 
-FLOW_TEMPLATE = "flow-submit {container} --config {file_path} --options {options} --prolog CUDA_VISIBLE_DEVICES={gpu_id}"
+FLOW_TEMPLATE = 'flow-submit {container} --config {file_path} --options {options} --prolog SINGULARITYENV_CUDA_VISIBLE_DEVICES={gpu_id}\nSINGULARITYENV_HOME=/home/{user}'
 
 COMMAND_TEMPLATE = "mahler execute{container}{tags}{options}"
 
@@ -152,7 +153,8 @@ class AzureResources(Resources):
         file_path = os.path.join(submission_dir, file_name)
 
         flow_command = FLOW_TEMPLATE.format(
-            container=container, file_path=file_path, options=flow_options, gpu_id=gpu)
+            container=container, file_path=file_path, options=flow_options,
+            gpu_id=gpu, user=getpass.getuser())
 
         command = COMMAND_TEMPLATE.format(
             container=" --container " + container if container else "",
@@ -167,3 +169,4 @@ class AzureResources(Resources):
         print("\nCommand output")
         print("------")
         print(str(out, encoding='utf-8'))
+        time.sleep(0.5)
